@@ -1,15 +1,9 @@
 # Anthropic implied-valuation oracle
 
-[![CI](https://github.com/BryFReed/anth_oracle_test/actions/workflows/ci.yml/badge.svg)](https://github.com/BryFReed/anth_oracle_test/actions/workflows/ci.yml)
-
-This repository is the informational, documentation-only mirror of the
-listing-review implementation for an Anthropic pre-IPO perpetual market. It
-exists to make the oracle design easy to read and share; the full source,
-tests, and CI live in
-[`anth_oracle_test`](https://github.com/BryFReed/anth_oracle_test).
-
-The oracle constructs a continuously tradable implied company valuation from
-independent public perpetual-futures order books on OKX, Bitget, and Binance.
+This document describes the oracle, mark-price, funding, and settlement design
+for an Anthropic pre-IPO perpetual market. The oracle constructs a continuously
+tradable implied company valuation from independent public perpetual-futures
+order books on OKX, Bitget, and Binance.
 
 The core design principle is simple:
 
@@ -22,7 +16,7 @@ liquidation mark, hourly funding, and final settlement. The Anthropic
 multi-venue source construction is custom because no standard Anthropic spot
 index exists.
 
-## Listing-review summary
+## Summary
 
 | Question | Answer |
 |---|---|
@@ -39,35 +33,11 @@ index exists.
 | Funding | Hourly trade.xyz-style custom funding, 0.5× multiplier, ±4% cap |
 | Final settlement | 60-minute external-oracle TWAP ending at final funding |
 | Historical evidence | 62 common daily observations; 0.967–0.989 return correlations |
-| Reproducibility | Source, tests, normalized CSVs, charts, notebook, and CI included |
-
-## Documentation, research & links
-
-- **Main implementation and listing-review documentation:**
-  [anth_oracle_test](https://github.com/BryFReed/anth_oracle_test)
-- **Oracle, mark-price, funding, failure-mode and settlement specification:**
-  [`ORACLE_SPEC.md`](https://github.com/BryFReed/anth_oracle_test/blob/main/ORACLE_SPEC.md)
-- **Historical pricing and liquidity research:**
-  [`research/HISTORICAL_PRICING.md`](https://github.com/BryFReed/anth_oracle_test/blob/main/research/HISTORICAL_PRICING.md)
-- **Executable Jupyter notebook:**
-  [`research/anthropic_perp_history.ipynb`](https://github.com/BryFReed/anth_oracle_test/blob/main/research/anthropic_perp_history.ipynb)
-- **Normalized historical dataset:**
-  [`research/data/anthropic_perp_daily.csv`](https://github.com/BryFReed/anth_oracle_test/blob/main/research/data/anthropic_perp_daily.csv)
-- **Valuation-history chart:**
-  [`research/charts/implied-valuation-history.png`](https://github.com/BryFReed/anth_oracle_test/blob/main/research/charts/implied-valuation-history.png)
-- **Volatility chart:**
-  [`research/charts/daily-volatility.png`](https://github.com/BryFReed/anth_oracle_test/blob/main/research/charts/daily-volatility.png)
-- **Liquidity and cross-venue-dispersion chart:**
-  [`research/charts/liquidity-and-dispersion.png`](https://github.com/BryFReed/anth_oracle_test/blob/main/research/charts/liquidity-and-dispersion.png)
-- **Reproducible data-acquisition and analysis code:**
-  [`research/build_history.py`](https://github.com/BryFReed/anth_oracle_test/blob/main/research/build_history.py)
-- **Passing CI run** (Python, research reproduction, notebook execution,
-  Rust, TypeScript, and WASM):
-  [GitHub Actions run 30848843658](https://github.com/BryFReed/anth_oracle_test/actions/runs/30848843658)
+| Reproducibility | Full reference implementation, deterministic tests, normalized datasets, and independent CI |
 
 ## Historical evidence
 
-The checked-in research uses completed UTC daily candles through August 2, 2026.
+The historical study uses completed UTC daily candles through August 2, 2026.
 It is deliberately separate from the live impact-price oracle.
 
 ![Normalized implied valuation history across the three venues](Docs/implied-valuation-history.png)
@@ -91,8 +61,11 @@ venue is most convenient.
 
 ![Liquidity and cross-venue dispersion](Docs/liquidity-and-dispersion.png)
 
-Full methodology, charts, source URLs, concentration analysis, and caveats are
-in the [historical pricing report](https://github.com/BryFReed/anth_oracle_test/blob/main/research/HISTORICAL_PRICING.md).
+The historical pipeline uses OKX and Bitget official APIs and the official
+Binance futures API, falls back to Binance Data Collection ZIP files with
+verified published SHA-256 checksums where jurisdiction requires, and
+regenerates every figure and statistic from normalized checked-in data in a
+network-free mode.
 
 ## Live oracle flow
 
@@ -149,9 +122,9 @@ implied whole-company valuation
 ```
 
 OKX changed its scale 10:1 on June 30, 2026 while preserving economic value.
-The checked-in basis metadata is versioned as `anthropic-2026-06-30-v1`.
-A subsequent stale basis would create an approximately tenfold cross-venue
-disagreement and fail closed rather than contaminate the composite.
+The basis metadata is versioned as `anthropic-2026-06-30-v1`. A subsequent
+stale basis would create an approximately tenfold cross-venue disagreement and
+fail closed rather than contaminate the composite.
 
 The nominal share basis is an exchange contract convention. It is not a claim
 about Anthropic's legal fully diluted share count and does not confer equity
@@ -197,7 +170,7 @@ three-second updates.
 
 ## Liquidation mark
 
-Liquidations do not use a local last trade. `TradeXyzMarkEngine` publishes the
+Liquidations do not use a local last trade. The mark engine publishes the
 median of:
 
 1. the independent external oracle;
@@ -271,8 +244,7 @@ against the listed stock under a separately approved stock-oracle specification.
 
 ## SEDA transport
 
-[`seda/`](https://github.com/BryFReed/anth_oracle_test/tree/main/seda) contains
-the programmable SEDA Oracle Program:
+Delivery on-chain uses a programmable SEDA Oracle Program:
 
 - Each executor fetches executable books, normalizes scales, and computes the
   instantaneous robust venue composite.
@@ -311,99 +283,24 @@ liquidation performance, and concentration. External market makers receive the
 same source health, target, clamp, funding, and reduce-only state exposed by the
 reference output.
 
-## Run the live reference
+## Reproducibility and verification
 
-The runnable implementation lives in
-[`anth_oracle_test`](https://github.com/BryFReed/anth_oracle_test); this
-repository is documentation-only, so the commands below apply once you clone
-that repo.
+The design above is backed by a working reference implementation, not a
+paper-only specification:
 
-```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
+- a stateful live oracle covering impact pricing, per-venue TWAP, the
+  cross-venue rule, the publication limiter, mark, funding, and settlement;
+- a deterministic test suite covering boundary conditions, venue outages,
+  encoding, funding accrual, and final settlement;
+- a reproducible historical pipeline that regenerates every dataset, statistic,
+  and chart in this document from official venue APIs, with a network-free mode
+  over normalized checked-in data; and
+- independent continuous integration spanning Python formatting and tests,
+  research-data and notebook validation, Rust formatting, tests, and strict
+  linting, WASM compilation, and TypeScript checks.
 
-# Wait for a real TWAP window, print one result, and exit.
-.venv/bin/python cex_price.py --once
-.venv/bin/python cex_price.py --once --json
-
-# Continuous approximately three-second updates.
-.venv/bin/python cex_price.py
-
-# Compare the direct calculation with a deployed SEDA program.
-.venv/bin/python cex_price.py --verify
-```
-
-Useful overrides:
-
-```bash
-ORACLE_IMPACT_NOTIONAL_USD=10000
-ORACLE_TWAP_SECONDS=30
-ORACLE_UPDATE_SECONDS=3
-ORACLE_MAX_STALENESS_SECONDS=10
-```
-
-Public order-book APIs require no API keys. Binance applies jurisdictional
-restrictions; production infrastructure must use an eligible direct or licensed
-data path. `BINANCE_PROXY` and `CEX_PROXY` exist only for authorized routing.
-There is deliberately no delayed CoinGecko or manager-NAV fallback.
-
-SEDA Fast additionally requires `SEDA_API_KEY` and a deployed
-`SEDA_PROGRAM_ID`. See
-[`seda/README.md`](https://github.com/BryFReed/anth_oracle_test/blob/main/seda/README.md).
-
-## Reproduce the historical study
-
-```bash
-python3 -m venv .venv-research
-.venv-research/bin/pip install -r requirements-research.txt
-
-# Exact checked-in cutoff: includes completed days through Aug. 2, 2026.
-.venv-research/bin/python research/build_history.py --as-of 2026-08-03
-
-# Network-free regeneration from the normalized checked-in data.
-.venv-research/bin/python research/build_history.py \
-  --offline --as-of 2026-08-03
-```
-
-The pipeline uses OKX and Bitget official APIs and the official Binance futures
-API. If Binance blocks the current jurisdiction, it automatically uses Binance
-Data Collection ZIP files and verifies their published SHA-256 checksums.
-
-## Tests and independent CI
-
-```bash
-python3 -m unittest discover -s tests -v
-ruff check oracle_core.py cex_price.py research tests
-ruff format --check oracle_core.py cex_price.py research tests
-
-cd seda
-cargo fmt --all -- --check
-cargo test --locked
-cargo clippy --all-features --locked -- -D warnings
-cargo build --target wasm32-wasip1 --profile release-wasm --locked
-bunx tsc --noEmit --target ES2022 --module NodeNext \
-  --moduleResolution NodeNext --types bun scripts/post-dr.ts
-```
-
-GitHub Actions independently runs Python formatting/tests, research-data and
-notebook validation, Rust formatting/tests/strict lint, WASM compilation, and
-TypeScript checks. See the
-[passing CI run](https://github.com/BryFReed/anth_oracle_test/actions/runs/30848843658).
-
-## Repository map (anth_oracle_test)
-
-| Path | Purpose |
-|---|---|
-| [`oracle_core.py`](https://github.com/BryFReed/anth_oracle_test/blob/main/oracle_core.py) | Stateful live oracle, mark, funding, settlement, and wire-format primitives |
-| [`cex_price.py`](https://github.com/BryFReed/anth_oracle_test/blob/main/cex_price.py) | CLI, JSON output, SEDA Fast client, and live verification |
-| [`ORACLE_SPEC.md`](https://github.com/BryFReed/anth_oracle_test/blob/main/ORACLE_SPEC.md) | Form-ready specification and provider answers |
-| [`research/build_history.py`](https://github.com/BryFReed/anth_oracle_test/blob/main/research/build_history.py) | Reproducible historical acquisition and analytics |
-| [`research/HISTORICAL_PRICING.md`](https://github.com/BryFReed/anth_oracle_test/blob/main/research/HISTORICAL_PRICING.md) | Historical results and interpretation |
-| [`research/anthropic_perp_history.ipynb`](https://github.com/BryFReed/anth_oracle_test/blob/main/research/anthropic_perp_history.ipynb) | Executable notebook |
-| [`research/data/`](https://github.com/BryFReed/anth_oracle_test/tree/main/research/data) | Normalized long/wide CSVs and summary JSON |
-| [`research/charts/`](https://github.com/BryFReed/anth_oracle_test/tree/main/research/charts) | Review-ready PNG and SVG charts |
-| [`seda/`](https://github.com/BryFReed/anth_oracle_test/tree/main/seda) | SEDA execution/tally program and posting client |
-| [`tests/`](https://github.com/BryFReed/anth_oracle_test/tree/main/tests) | Deterministic safety, boundary, and data-integrity tests |
+Partners and reviewers receive the full source, datasets, notebook, and CI
+history as part of the listing-review package.
 
 ## Methodology references
 
