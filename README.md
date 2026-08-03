@@ -16,24 +16,6 @@ liquidation mark, hourly funding, and final settlement. The Anthropic
 multi-venue source construction is custom because no standard Anthropic spot
 index exists.
 
-## Summary
-
-| Question | Answer |
-|---|---|
-| What is being priced? | Implied whole-company Anthropic valuation in USD |
-| External venues | OKX, Bitget, Binance |
-| Input price | Executable $10,000 bid and ask impact VWAP midpoint |
-| Per-venue smoothing | 30-second continuous-time TWAP |
-| Minimum independent sources | Two |
-| Normal aggregation | Capped equal-weight mean; median is the outlier reference |
-| Normal publication cadence | Approximately every three seconds |
-| Publication limit | 50bps per update; confirmed moves catch up over successive updates |
-| Oracle failure | Reduce-only; no new oracle value |
-| Liquidation price | Separate three-component manipulation-resistant mark |
-| Funding | Hourly trade.xyz-style custom funding, 0.5× multiplier, ±4% cap |
-| Final settlement | 60-minute external-oracle TWAP ending at final funding |
-| Historical evidence | 62 common daily observations; 0.967–0.989 return correlations |
-| Reproducibility | Full reference implementation, deterministic tests, normalized datasets, and independent CI |
 
 ## Historical evidence
 
