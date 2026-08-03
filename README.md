@@ -35,6 +35,25 @@ index exists.
 | Historical evidence | 62 common daily observations; 0.967–0.989 return correlations |
 | Reproducibility | Full reference implementation, deterministic tests, normalized datasets, and independent CI |
 
+## Documentation and research in this repository
+
+- [`ORACLE_SPEC.md`](ORACLE_SPEC.md) — oracle, mark-price, funding,
+  failure-mode, and settlement specification in questionnaire form.
+- [`research/HISTORICAL_PRICING.md`](research/HISTORICAL_PRICING.md) —
+  historical pricing and liquidity research: results, methodology,
+  normalization, the OKX rebase, and limitations.
+- [`research/anthropic_perp_history.ipynb`](research/anthropic_perp_history.ipynb)
+  — executable Jupyter notebook reproducing the analysis.
+- [`research/data/anthropic_perp_daily.csv`](research/data/anthropic_perp_daily.csv)
+  — normalized historical dataset with a source URL on every row, plus a
+  [wide-form CSV](research/data/anthropic_perp_daily_wide.csv) and
+  [machine-readable summary](research/data/historical_summary.json).
+- [`research/build_history.py`](research/build_history.py) — reproducible
+  data-acquisition and analysis code that regenerates every dataset,
+  statistic, chart, and the notebook.
+- [`research/charts/`](research/charts/) — valuation-history, volatility, and
+  liquidity/cross-venue-dispersion charts in PNG and SVG.
+
 ## Historical evidence
 
 The historical study uses completed UTC daily candles through August 2, 2026.
@@ -292,15 +311,31 @@ paper-only specification:
   cross-venue rule, the publication limiter, mark, funding, and settlement;
 - a deterministic test suite covering boundary conditions, venue outages,
   encoding, funding accrual, and final settlement;
-- a reproducible historical pipeline that regenerates every dataset, statistic,
-  and chart in this document from official venue APIs, with a network-free mode
+- the reproducible historical pipeline checked in here under
+  [`research/`](research/), which regenerates every dataset, statistic, and
+  chart in this document from official venue APIs, with a network-free mode
   over normalized checked-in data; and
 - independent continuous integration spanning Python formatting and tests,
-  research-data and notebook validation, Rust formatting, tests, and strict
-  linting, WASM compilation, and TypeScript checks.
+  research-reproduction and notebook-execution validation, Rust formatting,
+  tests, and strict linting, WASM compilation, and TypeScript checks — all
+  passing on the current revision.
 
-Partners and reviewers receive the full source, datasets, notebook, and CI
-history as part of the listing-review package.
+Partners and reviewers receive the full source and CI history as part of the
+listing-review package.
+
+To reproduce the historical study from this repository:
+
+```bash
+python3 -m venv .venv-research
+.venv-research/bin/pip install -r requirements-research.txt
+
+# Re-download primary-source history and rebuild everything through Aug. 2.
+.venv-research/bin/python research/build_history.py --as-of 2026-08-03
+
+# Regenerate charts and statistics without any network calls.
+.venv-research/bin/python research/build_history.py \
+  --offline --as-of 2026-08-03
+```
 
 ## Methodology references
 

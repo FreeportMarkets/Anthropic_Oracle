@@ -1,0 +1,53 @@
+{
+  "annualized_realized_volatility": 0.45532547477110796,
+  "common_history_end": "2026-08-02",
+  "common_history_start": "2026-06-02",
+  "common_observations": 62,
+  "common_period_return": -0.17098112448002867,
+  "daily_return_correlations": {
+    "Binance": {
+      "Binance": 1.0,
+      "Bitget": 0.988717919157,
+      "OKX": 0.966586322782
+    },
+    "Bitget": {
+      "Binance": 0.988717919157,
+      "Bitget": 1.0,
+      "OKX": 0.970070035422
+    },
+    "OKX": {
+      "Binance": 0.966586322782,
+      "Bitget": 0.970070035422,
+      "OKX": 1.0
+    }
+  },
+  "data_cutoff_exclusive_utc": "2026-08-03",
+  "first_median_valuation_usd": 1788560000000,
+  "largest_daily_move": -0.09664460655285656,
+  "largest_daily_move_date": "2026-07-20",
+  "latest_30d_average_quote_volume_usd": 5161786.438861666,
+  "latest_30d_quote_volume_by_venue_usd": {
+    "Binance": 106451742.823,
+    "Bitget": 29600905.2193,
+    "OKX": 18800945.123549998
+  },
+  "latest_30d_quote_volume_share": {
+    "Binance": 0.6874347610971413,
+    "Bitget": 0.19115413865532388,
+    "OKX": 0.1214111002475349
+  },
+  "latest_30d_total_quote_volume_usd": 154853593.16584998,
+  "latest_close_by_venue_usd": {
+    "Binance": 1436690000000,
+    "Bitget": 1482750000000,
+    "OKX": 1507300000000
+  },
+  "latest_median_valuation_usd": 1482750000000,
+  "maximum_cross_venue_spread_bps": 628.790684402567,
+  "median_absolute_daily_move": 0.005841247088335444,
+  "median_aggregate_daily_quote_volume_usd": 3991545.84201,
+  "median_cross_venue_spread_bps": 448.27266063798834,
+  "methodology": "Completed UTC daily closes, normalized by venue nominal share basis; daily median is a historical diagnostic, not the live impact-price oracle",
+  "normalized_daily_csv_sha256": "0e4c6180adc1acfe3b190215f4d53cd7dd522f6ecbc1d85f406e6a0bc3fae793",
+  "p95_cross_venue_spread_bps": 581.2892819549392
+}

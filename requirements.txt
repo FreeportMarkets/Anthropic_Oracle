@@ -1,0 +1,5 @@
+# Base dependencies shared by the research pipeline.
+# Setup:  python3 -m venv .venv-research
+#         .venv-research/bin/pip install -r requirements-research.txt
+
+requests==2.34.2      # public venue market-data APIs

@@ -1,0 +1,7 @@
+-r requirements.txt
+
+# Pinned so the committed charts and notebook can be regenerated consistently.
+jupyterlab==4.6.2
+matplotlib==3.11.1
+nbformat==5.10.4
+pandas==3.0.5
