@@ -11,10 +11,6 @@ The core design principle is simple:
 > two independent external sources remain reliable, new positions are disabled
 > instead of manufacturing or carrying forward a fresh price.
 
-The architecture follows trade.xyz's public separation of external oracle,
-liquidation mark, hourly funding, and final settlement. The Anthropic
-multi-venue source construction is custom because no standard Anthropic spot
-index exists.
 
 
 ## Documentation and research in this repository
